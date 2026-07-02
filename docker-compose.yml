@@ -1,0 +1,15 @@
+services:
+  app:
+    build: .
+    container_name: marketplace-api
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+      - marketplace-data:/app/data
+    environment:
+      - DATABASE_URL=sqlite:///./data/marketplace.db
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+volumes:
+  marketplace-data:
