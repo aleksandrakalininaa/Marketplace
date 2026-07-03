@@ -29,7 +29,7 @@ function CategoryNodeItem({
   onSelect: (id: string) => void;
   depth?: number;
 }) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
   const hasChildren = category.children && category.children.length > 0;
   const isActive = activeId === category.id;
 
