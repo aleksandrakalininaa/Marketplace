@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { catalogApi } from '../api/catalog';
 import type { ProductDetail } from '../api/catalog';
 
 /** Страница товара: галерея, описание, характеристики, кнопка в корзину */
 export function ProductPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [product, setProduct] = useState<ProductDetail | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<{ status: number; message: string } | null>(null);
@@ -76,14 +77,19 @@ export function ProductPage() {
 
   return (
     <div className="product-page">
-      <Link to="/" className="back-link product-back">← В каталог</Link>
+      <button
+        onClick={() => navigate(-1)}
+        className="back-link product-back"
+        style={{ background: 'none', border: 'none', cursor: 'pointer', fontSize: 'inherit' }}
+      >
+        ← Назад
+      </button>
 
       <div className="product-detail">
-        {/* Галерея изображений */}
         <div className="product-gallery">
           <div className="gallery-main">
             {images.length > 0 ? (
-              <img src={images[activeImage]} alt={product.name} />
+              <img src={images[activeImage]} alt={product.name} referrerPolicy="no-referrer" />
             ) : (
               <div className="gallery-no-image">Нет фото</div>
             )}
@@ -96,14 +102,13 @@ export function ProductPage() {
                   className={`gallery-thumb ${i === activeImage ? 'active' : ''}`}
                   onClick={() => setActiveImage(i)}
                 >
-                  <img src={url} alt={`${product.name} ${i + 1}`} />
+                  <img src={url} alt={`${product.name} ${i + 1}`} referrerPolicy="no-referrer" />
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        {/* Информация о товаре */}
         <div className="product-info">
           <h1 className="product-title">{product.name}</h1>
           <p className="product-price-detail">{product.price.toFixed(2)} ₽</p>
@@ -120,7 +125,6 @@ export function ProductPage() {
             {inStock ? 'Добавить в корзину' : 'Нет в наличии'}
           </button>
 
-          {/* Характеристики */}
           {attrs.length > 0 && (
             <div className="product-attributes">
               <h3>Характеристики</h3>
@@ -137,7 +141,6 @@ export function ProductPage() {
             </div>
           )}
 
-          {/* Описание */}
           {product.description && (
             <div className="product-description">
               <h3>Описание</h3>

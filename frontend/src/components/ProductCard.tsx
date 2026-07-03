@@ -15,7 +15,7 @@ export function ProductCard({ product }: ProductCardProps) {
       <div className="product-card">
         <div className="product-card-image">
           {imageUrl ? (
-            <img src={imageUrl} alt={product.name} />
+            <img src={imageUrl} alt={product.name} referrerPolicy="no-referrer" />
           ) : (
             <div className="product-card-no-image">Нет фото</div>
           )}
