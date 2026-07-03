@@ -693,3 +693,277 @@ body {
   opacity: 0.3;
   cursor: not-allowed;
 }
+
+/* Ссылка-обёртка карточки товара */
+.product-card-link {
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+/* ===== Страница товара ===== */
+.product-page {
+  min-height: calc(100vh - 58px);
+  background: #0f0f1a;
+  padding: 28px;
+}
+
+.product-back {
+  display: inline-block;
+  margin-bottom: 24px;
+}
+
+.back-link {
+  color: #a78bfa;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 600;
+  transition: color 0.2s;
+}
+
+.back-link:hover {
+  color: #c4b5fd;
+}
+
+.product-detail {
+  display: flex;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Галерея */
+.product-gallery {
+  flex: 0 0 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gallery-main {
+  width: 100%;
+  aspect-ratio: 1;
+  background: rgba(25, 25, 50, 0.6);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-main img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-no-image {
+  color: #444;
+  font-size: 16px;
+}
+
+.gallery-thumbnails {
+  display: flex;
+  gap: 10px;
+}
+
+.gallery-thumb {
+  width: 80px;
+  height: 80px;
+  border: 2px solid transparent;
+  border-radius: 10px;
+  overflow: hidden;
+  cursor: pointer;
+  background: none;
+  padding: 0;
+  opacity: 0.5;
+  transition: all 0.2s;
+}
+
+.gallery-thumb.active {
+  border-color: #667eea;
+  opacity: 1;
+}
+
+.gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Информация */
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.product-title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #e0e0e0;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.product-price-detail {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(135deg, #667eea, #a78bfa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin: 0;
+}
+
+.product-stock {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.product-stock.in-stock {
+  color: #4ade80;
+}
+
+.product-stock.out-of-stock {
+  color: #666;
+}
+
+.btn-add-cart-detail {
+  padding: 16px 32px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 12px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s;
+  align-self: flex-start;
+}
+
+.btn-add-cart-detail:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(102, 126, 234, 0.35);
+}
+
+.btn-add-cart-detail:disabled {
+  background: rgba(255, 255, 255, 0.05);
+  color: #555;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Характеристики */
+.product-attributes {
+  margin-top: 12px;
+}
+
+.product-attributes h3,
+.product-description h3 {
+  font-size: 17px;
+  font-weight: 700;
+  color: #ccc;
+  margin-bottom: 12px;
+}
+
+.product-attributes table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.product-attributes tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.product-attributes td {
+  padding: 10px 0;
+  font-size: 14px;
+}
+
+.attr-key {
+  color: #777;
+  width: 40%;
+}
+
+.attr-value {
+  color: #ccc;
+}
+
+/* Описание */
+.product-description {
+  margin-top: 8px;
+}
+
+.product-description p {
+  color: #aaa;
+  font-size: 15px;
+  line-height: 1.7;
+}
+
+/* Скелетон страницы товара */
+.product-skeleton {
+  display: flex;
+  gap: 40px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.skeleton-gallery {
+  flex: 0 0 60%;
+  aspect-ratio: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 16px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.skeleton-line {
+  height: 20px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 6px;
+  animation: pulse 1.5s infinite;
+}
+
+.skeleton-title {
+  height: 36px;
+  width: 80%;
+}
+
+.skeleton-price {
+  height: 40px;
+  width: 40%;
+}
+
+/* Ошибка */
+.product-error {
+  text-align: center;
+  padding: 80px 20px;
+  color: #888;
+}
+
+.product-error h2 {
+  font-size: 22px;
+  margin-bottom: 16px;
+  color: #ccc;
+}
+
+.btn-retry {
+  padding: 10px 24px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}

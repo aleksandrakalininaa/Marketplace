@@ -23,6 +23,19 @@ export interface ProductShort {
   category: CategoryShort | null;
 }
 
+export interface ProductDetail {
+  id: string;
+  name: string;
+  description: string;
+  price: number;
+  quantity: number;
+  image_urls: string[];
+  attributes: Record<string, string>;
+  category: CategoryShort | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface ProductListResponse {
   items: ProductShort[];
   total: number;
@@ -41,12 +54,14 @@ export interface ProductFilters {
 }
 
 export const catalogApi = {
-  /** Получить дерево категорий */
   getCategories(): Promise<{ data: CategoryNode[] }> {
     return api.get('/api/v1/categories');
   },
 
-  /** Получить список товаров с фильтрами */
+  getProduct(id: string): Promise<{ data: ProductDetail }> {
+    return api.get(`/api/v1/products/${id}`);
+  },
+
   getProducts(filters: ProductFilters): Promise<{ data: ProductListResponse }> {
     const params: Record<string, string | number | boolean> = {
       category_id: filters.category_id,

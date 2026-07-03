@@ -43,6 +43,23 @@ class ProductShort(BaseModel):
         from_attributes = True
 
 
+class ProductDetail(BaseModel):
+    """Полная информация о товаре."""
+    id: UUID
+    name: str
+    description: str = ""
+    price: float
+    quantity: int
+    image_urls: list = []
+    attributes: dict = {}
+    category: Optional[CategoryShort] = None
+    created_at: datetime
+    updated_at: datetime
+
+    class Config:
+        from_attributes = True
+
+
 class ProductListResponse(BaseModel):
     """Ответ списка товаров с пагинацией."""
     items: list[ProductShort]

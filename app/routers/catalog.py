@@ -4,10 +4,13 @@
 import uuid
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from app.database import get_db
-from app.schemas.catalog import CategoryOut, ProductListResponse
+from app.models.catalog import CatalogProduct
+from app.schemas.catalog import CategoryOut, ProductDetail, ProductListResponse
 from app.services.catalog import get_category_tree, get_products
 
 router = APIRouter(prefix="/api/v1", tags=["catalog"])
@@ -52,7 +55,6 @@ async def list_products(
     db: AsyncSession = Depends(get_db),
 ):
     """Возвращает список товаров в категории с фильтрацией и пагинацией."""
-    # Валидация sort
     allowed_sorts = {"price_asc", "price_desc", "name_asc", "name_desc", "newest"}
     if sort is not None and sort not in allowed_sorts:
         raise HTTPException(
@@ -74,6 +76,38 @@ async def list_products(
             limit=limit,
         )
         return result
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail={"error": "internal_error", "message": str(e)},
+        )
+
+
+@router.get(
+    "/products/{product_id}",
+    response_model=ProductDetail,
+    responses={
+        404: {"description": "Товар не найден"},
+        500: {"description": "Ошибка сервера"},
+    },
+)
+async def get_product(product_id: uuid.UUID, db: AsyncSession = Depends(get_db)):
+    """Возвращает полную информацию о товаре по ID."""
+    try:
+        result = await db.execute(
+            select(CatalogProduct)
+            .where(CatalogProduct.id == product_id)
+            .options(selectinload(CatalogProduct.category))
+        )
+        product = result.scalar_one_or_none()
+        if product is None or not product.is_active:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail={"error": "not_found", "message": "Товар не найден"},
+            )
+        return product
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
