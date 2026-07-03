@@ -7,6 +7,7 @@ import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
 import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { VkCallbackPage } from './pages/VkCallbackPage';
 import { DashboardPage } from './pages/DashboardPage';
+import { CatalogPage } from './pages/CatalogPage';
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
           <Route path="/forgot-password" element={<ForgotPasswordPage />} />
           <Route path="/auth/reset-password" element={<ResetPasswordPage />} />
           <Route path="/auth/vk-callback" element={<VkCallbackPage />} />
+          <Route path="/catalog" element={<CatalogPage />} />
           <Route
             path="/dashboard"
             element={
