@@ -74,7 +74,10 @@ export function CatalogPage() {
   };
 
   const handleCategorySelect = (id: string) => {
-    updateParam('category_id', id);
+    // Сброс всех фильтров при переходе в другую категорию
+    const newParams = new URLSearchParams();
+    newParams.set('category_id', id);
+    setSearchParams(newParams);
   };
 
   const totalPages = Math.ceil(total / limit);
