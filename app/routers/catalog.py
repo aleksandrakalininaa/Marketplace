@@ -42,7 +42,8 @@ async def list_categories(db: AsyncSession = Depends(get_db)):
     },
 )
 async def list_products(
-    category_id: uuid.UUID = Query(..., description="ID категории"),
+    search: str = Query("", description="Поисковый запрос"),
+    category_id: uuid.UUID | None = Query(None, description="ID категории (опционально)"),
     min_price: float | None = Query(None, ge=0, description="Минимальная цена"),
     max_price: float | None = Query(None, ge=0, description="Максимальная цена"),
     in_stock: bool | None = Query(None, description="Только в наличии"),
@@ -54,7 +55,7 @@ async def list_products(
     limit: int = Query(20, ge=1, le=50, description="Элементов на странице"),
     db: AsyncSession = Depends(get_db),
 ):
-    """Возвращает список товаров в категории с фильтрацией и пагинацией."""
+    """Возвращает список товаров по поисковому запросу с фильтрацией и пагинацией."""
     allowed_sorts = {"price_asc", "price_desc", "name_asc", "name_desc", "newest"}
     if sort is not None and sort not in allowed_sorts:
         raise HTTPException(
@@ -67,6 +68,7 @@ async def list_products(
     try:
         result = await get_products(
             db=db,
+            search=search,
             category_id=category_id,
             min_price=min_price,
             max_price=max_price,

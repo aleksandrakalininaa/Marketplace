@@ -1,11 +1,14 @@
 import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { authApi } from '../api/auth';
+import { SearchBar } from '../components/SearchBar';
 import { CatalogPage } from './CatalogPage';
 
 /** Единая главная страница: без авторизации — формы, после входа — каталог */
 export function HomePage() {
   const { user, isAuthenticated, login, logout } = useAuth();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Режим: 'login' | 'register' | 'forgot'
   const [mode, setMode] = useState<'login' | 'register' | 'forgot'>('login');
@@ -73,6 +76,18 @@ export function HomePage() {
     window.location.href = vkAuthUrl;
   };
 
+  // Поиск обновляет URL с сохранением остальных параметров
+  const handleSearch = (value: string) => {
+    const newParams = new URLSearchParams(searchParams);
+    if (value) {
+      newParams.set('search', value);
+    } else {
+      newParams.delete('search');
+    }
+    newParams.set('page', '1');
+    setSearchParams(newParams);
+  };
+
   // === НЕ АВТОРИЗОВАН — показываем формы ===
   if (!isAuthenticated) {
     return (
@@ -80,7 +95,6 @@ export function HomePage() {
         <div className="auth-card">
           <h1>Маркетплейс</h1>
 
-          {/* Табы */}
           <div className="auth-tabs">
             <button
               className={`auth-tab ${mode === 'login' ? 'active' : ''}`}
@@ -99,7 +113,6 @@ export function HomePage() {
           {success && <p className="success">{success}</p>}
           {error && <p className="error">{error}</p>}
 
-          {/* Форма входа */}
           {mode === 'login' && (
             <form onSubmit={handleLogin}>
               <input
@@ -125,7 +138,6 @@ export function HomePage() {
             </form>
           )}
 
-          {/* Форма регистрации */}
           {mode === 'register' && (
             <form onSubmit={handleRegister}>
               <input
@@ -146,7 +158,6 @@ export function HomePage() {
             </form>
           )}
 
-          {/* Форма восстановления пароля */}
           {mode === 'forgot' && (
             <form onSubmit={handleForgot}>
               <input
@@ -169,6 +180,8 @@ export function HomePage() {
   }
 
   // === АВТОРИЗОВАН — каталог ===
+  const currentSearch = searchParams.get('search') || '';
+
   return (
     <div>
       <header className="catalog-header">
@@ -176,6 +189,7 @@ export function HomePage() {
           <h1>Маркетплейс</h1>
           <span className="header-greeting">Привет, {user?.name}</span>
         </div>
+        <SearchBar initialValue={currentSearch} onSearch={handleSearch} />
         <div className="catalog-header-right">
           <button className="header-btn" onClick={logout}>Выйти</button>
         </div>

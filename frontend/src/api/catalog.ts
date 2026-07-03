@@ -44,7 +44,8 @@ export interface ProductListResponse {
 }
 
 export interface ProductFilters {
-  category_id: string;
+  search: string;
+  category_id?: string;
   min_price?: number;
   max_price?: number;
   in_stock?: boolean;
@@ -64,8 +65,9 @@ export const catalogApi = {
 
   getProducts(filters: ProductFilters): Promise<{ data: ProductListResponse }> {
     const params: Record<string, string | number | boolean> = {
-      category_id: filters.category_id,
+      search: filters.search,
     };
+    if (filters.category_id) params.category_id = filters.category_id;
     if (filters.min_price !== undefined) params.min_price = filters.min_price;
     if (filters.max_price !== undefined) params.max_price = filters.max_price;
     if (filters.in_stock !== undefined) params.in_stock = filters.in_stock;

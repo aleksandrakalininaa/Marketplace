@@ -4,7 +4,7 @@
 import uuid
 from typing import Optional
 
-from sqlalchemy import select, func, or_
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -12,10 +12,7 @@ from app.models.catalog import Category, CatalogProduct
 
 
 async def get_category_tree(db: AsyncSession) -> list[Category]:
-    """
-    Возвращает корневые категории с рекурсивно загруженными дочерними.
-    selectinload подгружает children для каждого узла дерева.
-    """
+    """Возвращает корневые категории с рекурсивно загруженными дочерними."""
     result = await db.execute(
         select(Category)
         .where(Category.parent_id.is_(None))
@@ -28,29 +25,23 @@ async def get_category_tree(db: AsyncSession) -> list[Category]:
 async def _get_descendant_category_ids(
     db: AsyncSession, category_id: uuid.UUID
 ) -> list[uuid.UUID]:
-    """
-    Рекурсивно собирает ID категории и всех её потомков.
-    Для PostgreSQL можно было бы использовать WITH RECURSIVE,
-    но для совместимости через ORM обход дерева.
-    """
+    """Рекурсивно собирает ID категории и всех её потомков."""
     ids = [category_id]
-
     result = await db.execute(
         select(Category)
         .where(Category.parent_id == category_id)
         .options(selectinload(Category.children))
     )
     children = result.scalars().all()
-
     for child in children:
         ids.extend(await _get_descendant_category_ids(db, child.id))
-
     return ids
 
 
 async def get_products(
     db: AsyncSession,
-    category_id: uuid.UUID,
+    search: str,
+    category_id: Optional[uuid.UUID] = None,
     min_price: Optional[float] = None,
     max_price: Optional[float] = None,
     in_stock: Optional[bool] = None,
@@ -59,21 +50,31 @@ async def get_products(
     limit: int = 20,
 ):
     """
-    Расширенный запрос товаров с фильтрацией, сортировкой и пагинацией.
+    Поиск товаров с фильтрацией, сортировкой и пагинацией.
+    search — обязательный поисковый запрос (ILIKE по name и description).
+    category_id — опциональный фильтр по категории и подкатегориям.
     """
-    # Собираем ID категории и всех потомков
-    category_ids = await _get_descendant_category_ids(db, category_id)
+    # Базовый запрос: только активные товары
+    query = select(CatalogProduct).where(CatalogProduct.is_active == True)
 
-    # Базовый запрос
-    query = select(CatalogProduct).where(
-        CatalogProduct.is_active == True,
-        CatalogProduct.category_id.in_(category_ids),
-    )
+    # Поисковый запрос
+    if search:
+        like_pattern = f"%{search}%"
+        query = query.where(
+            CatalogProduct.name.ilike(like_pattern)
+            | CatalogProduct.description.ilike(like_pattern)
+        )
 
-    # Фильтры
+    # Фильтр по категории
+    if category_id is not None:
+        category_ids = await _get_descendant_category_ids(db, category_id)
+        query = query.where(CatalogProduct.category_id.in_(category_ids))
+
+    # Фильтр по наличию
     if in_stock:
         query = query.where(CatalogProduct.quantity > 0)
 
+    # Фильтр по цене
     if min_price is not None:
         query = query.where(CatalogProduct.price >= min_price)
 

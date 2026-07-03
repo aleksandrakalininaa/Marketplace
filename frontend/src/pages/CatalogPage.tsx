@@ -1,22 +1,21 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import { catalogApi } from '../api/catalog';
 import type { CategoryNode, ProductShort } from '../api/catalog';
 import { CategoryTree } from '../components/CategoryTree';
 import { ProductCard } from '../components/ProductCard';
 
-/** Страница каталога: дерево категорий + сетка товаров с фильтрами и пагинацией */
+/** Страница каталога: дерево категорий + поиск + сетка товаров с фильтрами */
 export function CatalogPage() {
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Состояния
   const [categories, setCategories] = useState<CategoryNode[]>([]);
   const [products, setProducts] = useState<ProductShort[]>([]);
   const [total, setTotal] = useState(0);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Параметры из URL
+  const search = searchParams.get('search') || '';
   const categoryId = searchParams.get('category_id') || '';
   const minPrice = searchParams.get('min_price') || '';
   const maxPrice = searchParams.get('max_price') || '';
@@ -25,7 +24,7 @@ export function CatalogPage() {
   const page = parseInt(searchParams.get('page') || '1', 10);
   const limit = 20;
 
-  // Загрузка категорий при монтировании
+  // Загрузка категорий
   useEffect(() => {
     catalogApi
       .getCategories()
@@ -35,11 +34,13 @@ export function CatalogPage() {
 
   // Загрузка товаров при изменении параметров
   const fetchProducts = useCallback(async () => {
-    if (!categoryId) return;
+    // Нужен либо search, либо categoryId
+    if (!search && !categoryId) return;
     setLoading(true);
     setError(null);
     try {
-      const filters: any = { category_id: categoryId, page, limit, sort };
+      const filters: any = { search, page, limit, sort };
+      if (categoryId) filters.category_id = categoryId;
       if (minPrice) filters.min_price = parseFloat(minPrice);
       if (maxPrice) filters.max_price = parseFloat(maxPrice);
       if (inStock) filters.in_stock = true;
@@ -52,13 +53,12 @@ export function CatalogPage() {
     } finally {
       setLoading(false);
     }
-  }, [categoryId, minPrice, maxPrice, inStock, sort, page]);
+  }, [search, categoryId, minPrice, maxPrice, inStock, sort, page]);
 
   useEffect(() => {
     fetchProducts();
   }, [fetchProducts]);
 
-  // Обновление URL
   const updateParam = (key: string, value: string) => {
     const newParams = new URLSearchParams(searchParams);
     if (value) {
@@ -66,7 +66,6 @@ export function CatalogPage() {
     } else {
       newParams.delete(key);
     }
-    // Сброс страницы при смене фильтров
     if (key !== 'page') {
       newParams.set('page', '1');
     }
@@ -74,8 +73,9 @@ export function CatalogPage() {
   };
 
   const handleCategorySelect = (id: string) => {
-    // Сброс всех фильтров при переходе в другую категорию
+    // Сохраняем search если есть, добавляем category_id
     const newParams = new URLSearchParams();
+    if (search) newParams.set('search', search);
     newParams.set('category_id', id);
     setSearchParams(newParams);
   };
@@ -96,58 +96,53 @@ export function CatalogPage() {
 
       {/* Основная область */}
       <main className="catalog-main">
-        {/* Фильтры */}
-        <div className="catalog-filters">
-          <div className="filter-group">
-            <label>
-              Цена от:
+        {/* Фильтры — показываем только когда есть результаты или выбрана категория */}
+        {(search || categoryId) && (
+          <div className="catalog-filters">
+            <div className="filter-group">
+              <label>
+                Цена от:
+                <input
+                  type="number" min="0" value={minPrice}
+                  onChange={(e) => updateParam('min_price', e.target.value)} placeholder="0"
+                />
+              </label>
+              <label>
+                до:
+                <input
+                  type="number" min="0" value={maxPrice}
+                  onChange={(e) => updateParam('max_price', e.target.value)} placeholder="0"
+                />
+              </label>
+            </div>
+            <label className="filter-checkbox">
               <input
-                type="number"
-                min="0"
-                value={minPrice}
-                onChange={(e) => updateParam('min_price', e.target.value)}
-                placeholder="0"
+                type="checkbox" checked={inStock}
+                onChange={(e) => updateParam('in_stock', e.target.checked ? 'true' : '')}
               />
+              Только в наличии
             </label>
-            <label>
-              до:
-              <input
-                type="number"
-                min="0"
-                value={maxPrice}
-                onChange={(e) => updateParam('max_price', e.target.value)}
-                placeholder="0"
-              />
+            <label className="filter-sort">
+              Сортировка:
+              <select value={sort} onChange={(e) => updateParam('sort', e.target.value)}>
+                <option value="newest">Новые</option>
+                <option value="price_asc">Цена ↑</option>
+                <option value="price_desc">Цена ↓</option>
+                <option value="name_asc">Название А-Я</option>
+                <option value="name_desc">Название Я-А</option>
+              </select>
             </label>
-          </div>
-          <label className="filter-checkbox">
-            <input
-              type="checkbox"
-              checked={inStock}
-              onChange={(e) => updateParam('in_stock', e.target.checked ? 'true' : '')}
-            />
-            Только в наличии
-          </label>
-          <label className="filter-sort">
-            Сортировка:
-            <select value={sort} onChange={(e) => updateParam('sort', e.target.value)}>
-              <option value="newest">Новые</option>
-              <option value="price_asc">Цена ↑</option>
-              <option value="price_desc">Цена ↓</option>
-              <option value="name_asc">Название А-Я</option>
-              <option value="name_desc">Название Я-А</option>
-            </select>
-          </label>
-        </div>
-
-        {/* Состояния: загрузка / ошибка / пусто / сетка */}
-        {!categoryId && (
-          <div className="catalog-placeholder">
-            <p>Выберите категорию слева, чтобы увидеть товары</p>
           </div>
         )}
 
-        {categoryId && loading && (
+        {/* Состояния */}
+        {!search && !categoryId && (
+          <div className="catalog-placeholder">
+            <p>Выберите категорию слева или введите поисковый запрос</p>
+          </div>
+        )}
+
+        {loading && (
           <div className="catalog-skeleton">
             {Array.from({ length: 8 }).map((_, i) => (
               <div key={i} className="skeleton-card" />
@@ -155,34 +150,33 @@ export function CatalogPage() {
           </div>
         )}
 
-        {categoryId && error && (
+        {error && !loading && (
           <div className="catalog-error">
             <p>{error}</p>
             <button onClick={fetchProducts}>Повторить</button>
           </div>
         )}
 
-        {categoryId && !loading && !error && products.length === 0 && (
+        {!loading && !error && products.length === 0 && (search || categoryId) && (
           <div className="catalog-empty">
-            <p>В этой категории пока нет товаров</p>
+            {search
+              ? `По запросу «${search}» ничего не найдено`
+              : 'В этой категории пока нет товаров'}
           </div>
         )}
 
-        {categoryId && !loading && !error && products.length > 0 && (
+        {!loading && !error && products.length > 0 && (
           <>
+            {search && <p className="search-count">Найдено: {total} товаров</p>}
             <div className="product-grid">
               {products.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))}
             </div>
 
-            {/* Пагинация */}
             {totalPages > 1 && (
               <div className="pagination">
-                <button
-                  disabled={page <= 1}
-                  onClick={() => updateParam('page', String(page - 1))}
-                >
+                <button disabled={page <= 1} onClick={() => updateParam('page', String(page - 1))}>
                   ←
                 </button>
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => (
