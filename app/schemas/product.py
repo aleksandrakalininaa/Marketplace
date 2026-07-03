@@ -1,5 +1,6 @@
 from datetime import datetime
 from typing import Optional
+from uuid import UUID
 
 from pydantic import BaseModel
 
@@ -14,14 +15,14 @@ class ProductCreate(BaseModel):
 
 
 class ProductOut(BaseModel):
-    id: int
+    id: UUID
     title: str
     description: Optional[str]
     price: float
     quantity: int
     category: Optional[str]
     image_url: Optional[str]
-    seller_id: int
+    seller_id: UUID
     is_active: bool
     created_at: datetime
 

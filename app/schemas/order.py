@@ -1,10 +1,11 @@
 from datetime import datetime
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class OrderItemCreate(BaseModel):
-    product_id: int
+    product_id: UUID
     quantity: int = 1
 
 
@@ -13,8 +14,8 @@ class OrderCreate(BaseModel):
 
 
 class OrderItemOut(BaseModel):
-    id: int
-    product_id: int
+    id: UUID
+    product_id: UUID
     quantity: int
     price: float
 
@@ -23,8 +24,8 @@ class OrderItemOut(BaseModel):
 
 
 class OrderOut(BaseModel):
-    id: int
-    buyer_id: int
+    id: UUID
+    buyer_id: UUID
     status: str
     total_price: float
     created_at: datetime

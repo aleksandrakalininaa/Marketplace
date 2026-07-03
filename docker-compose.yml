@@ -1,15 +1,56 @@
 services:
-  app:
+  db:
+    image: postgres:16-alpine
+    container_name: marketplace-db
+    environment:
+      POSTGRES_USER: marketplace
+      POSTGRES_PASSWORD: marketplace
+      POSTGRES_DB: marketplace
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U marketplace"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
     build: .
     container_name: marketplace-api
     ports:
       - "8000:8000"
     volumes:
       - .:/app
-      - marketplace-data:/app/data
     environment:
-      - DATABASE_URL=sqlite:///./data/marketplace.db
+      - DATABASE_URL=postgresql+asyncpg://marketplace:marketplace@db:5432/marketplace
+      - VK_APP_ID=54663805
+      - VK_SECRET=u2uCCKUna1rBfqgc2s4Q
+      - VK_REDIRECT_URI=http://localhost:3000/auth/vk-callback
+      - FRONTEND_URL=http://localhost:3000
+      - SECRET_KEY=marketplace-jwt-secret-change-in-production
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: marketplace-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    environment:
+      - VITE_VK_APP_ID=54663805
+      - VITE_VK_REDIRECT_URI=http://localhost:3000/auth/vk-callback
+      - VITE_API_URL=http://localhost:8000
+    depends_on:
+      - backend
 
 volumes:
-  marketplace-data:
+  pgdata:
