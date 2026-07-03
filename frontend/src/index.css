@@ -132,6 +132,48 @@ body {
   padding: 0 12px;
 }
 
+/* Табы Вход / Регистрация */
+.auth-tabs {
+  display: flex;
+  gap: 0;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.auth-tab {
+  flex: 1;
+  padding: 12px;
+  background: none;
+  border: none;
+  font-size: 16px;
+  font-weight: 600;
+  color: #999;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+.auth-tab.active {
+  color: #667eea;
+  border-bottom-color: #667eea;
+}
+
+/* Кнопка-ссылка */
+.link-btn {
+  background: none !important;
+  border: none;
+  color: #667eea !important;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0 !important;
+}
+
+.link-btn:hover {
+  text-decoration: underline;
+}
+
 .vk-btn {
   width: 100%;
   background: #0077ff !important;
@@ -141,91 +183,60 @@ body {
   background: #0066dd !important;
 }
 
-/* Dashboard */
-.dashboard-container {
-  min-height: 100vh;
-  background: #f5f5f5;
-}
-
-.dashboard-header {
+/* ===== Хедер каталога (после входа) ===== */
+.catalog-header {
   background: #fff;
-  padding: 16px 40px;
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 100;
 }
 
-.dashboard-header h1 {
-  font-size: 22px;
-  color: #1a1a2e;
-}
-
-.dashboard-header nav {
+.catalog-header-left {
   display: flex;
   align-items: center;
   gap: 20px;
 }
 
-.dashboard-header nav span {
-  color: #555;
-  font-size: 15px;
+.catalog-header-left h1 {
+  font-size: 20px;
+  color: #1a1a2e;
+  margin: 0;
 }
 
-.dashboard-header nav button {
-  padding: 8px 20px;
+.header-greeting {
+  font-size: 14px;
+  color: #888;
+}
+
+.catalog-header-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.header-btn {
+  padding: 8px 16px;
   background: #e53935;
   color: #fff;
   border: none;
   border-radius: 6px;
-  cursor: pointer;
   font-size: 14px;
+  cursor: pointer;
 }
 
-.dashboard-header nav button:hover {
+.header-btn:hover {
   background: #c62828;
-}
-
-.dashboard-content {
-  max-width: 700px;
-  margin: 40px auto;
-  padding: 0 20px;
-}
-
-.dashboard-content h2 {
-  font-size: 24px;
-  margin-bottom: 24px;
-  color: #1a1a2e;
-}
-
-.profile-card {
-  background: #fff;
-  border-radius: 12px;
-  padding: 32px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.profile-card p {
-  font-size: 16px;
-  color: #444;
-}
-
-.vk-link-section {
-  margin-top: 16px;
-}
-
-.vk-link-section .vk-btn {
-  width: auto;
-  padding: 10px 24px;
 }
 
 /* ===== Каталог ===== */
 .catalog-page {
   display: flex;
-  min-height: 100vh;
+  min-height: calc(100vh - 56px);
   background: #f5f5f5;
 }
 
@@ -237,9 +248,9 @@ body {
   border-right: 1px solid #e0e0e0;
   padding: 20px 0;
   overflow-y: auto;
-  max-height: 100vh;
+  max-height: calc(100vh - 56px);
   position: sticky;
-  top: 0;
+  top: 56px;
 }
 
 .sidebar-title {
